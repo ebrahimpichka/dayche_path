@@ -8,24 +8,30 @@ c = conn.cursor()
 # Create table
 c.execute('''CREATE TABLE IF NOT EXISTS lifelog
              (id integer primary key autoincrement,
-              timeOfTask text, msg text)''')
+              timeOfTask date, msg text)''')
 
 
 currentDateTime = datetime.datetime.now()
 
 if len(sys.argv) > 1:
-    if sys.argv[1] == '-m':
-        c.execute("INSERT INTO lifelog (timeOfTask, msg) VALUES ('" 
-        + str(currentDateTime) + "',' " + sys.argv[2] + "')")
+
+    action = sys.argv[1]
+
+    if action == '-m':
+        sql_query = ''' INSERT INTO lifelog (timeOfTask, msg) VALUES (?,?); '''
+        params = (currentDateTime, sys.argv[2])
+        c.execute(sql_query, params)
+        #c.execute("INSERT INTO lifelog (timeOfTask, msg) VALUES ('" 
+        #+ currentDateTime + "',' " + sys.argv[2] + "')")
         print('DONE!')
         conn.commit()
-    elif sys.argv[1] == '-l':
+    elif action == '-l':
         sql_query = 'SELECT * FROM lifelog limit ' + sys.argv[2]  # + ' ORDER BY id DESC'
         print('The last ', sys.argv[2] , ' task(s):')
         for row in c.execute(sql_query):
             print('The task number:' , row[0] ,
             ' @' + row[1] , ' with message:\n' , row[2])
-    elif sys.argv[1] == '-h':
+    elif action == '-h':
         print('for add task use -m switch')
         print('for list task use -l <number> switch')
         
