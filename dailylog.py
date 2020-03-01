@@ -1,19 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import sys
 from datetime import datetime
 import sqlite3
 
 conn = sqlite3.connect('dailylog.db')
 c = conn.cursor()
-
-# if the the table does not exist already :
-#c.execute("""CREATE TABLE log(activity TEXT,`time` NUMERIC);""")
-#conn.commit
 
 commands = sys.argv
 
