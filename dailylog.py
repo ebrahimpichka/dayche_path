@@ -18,25 +18,33 @@ if len(sys.argv) > 1:
     action = sys.argv[1]
 
     if action == '-m':
+        message = sys.argv[2]
         sql_query = ''' INSERT INTO lifelog (timeOfTask, msg) VALUES (?,?); '''
-        params = (currentDateTime, sys.argv[2])
+        params = (currentDateTime, message)
         c.execute(sql_query, params)
-        #c.execute("INSERT INTO lifelog (timeOfTask, msg) VALUES ('" 
-        #+ currentDateTime + "',' " + sys.argv[2] + "')")
         print('DONE!')
         conn.commit()
     elif action == '-l':
-        sql_query = 'SELECT * FROM lifelog limit ' + sys.argv[2]  # + ' ORDER BY id DESC'
-        print('The last ', sys.argv[2] , ' task(s):')
-        for row in c.execute(sql_query):
-            print('The task number:' , row[0] ,
-            ' @' + row[1] , ' with message:\n' , row[2])
+        
+        try:
+            count = int(sys.argv[2])
+        except:
+            print("Enter a number for count of outputs, '", sys.argv[2], "' is not a number", sep="")
+            sys.exit(1)
+
+        sql_query = ''' SELECT * FROM lifelog ORDER BY timeOfTask DESC limit ? '''
+        params = (str(count))
+        print('The last ', count , ' task(s):')
+        for row in c.execute(sql_query, params):
+            print('IN ' + row[1][0:19] , ':\n> ' , row[2], sep="")
+
     elif action == '-h':
         print('for add task use -m switch')
         print('for list task use -l <number> switch')
         
-    # Save (commit) the changes
 else:
     print("Unknown command! -> press -h for help")
+
+
 conn.close()
 
