@@ -1,40 +1,50 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-import sys
-from datetime import datetime
 import sqlite3
+import sys
+import datetime
 
-conn = sqlite3.connect('dailylog.db')
+conn = sqlite3.connect('lifelog.db')
+
 c = conn.cursor()
-
-# if the the table does not exist already :
-#c.execute("""CREATE TABLE log(activity TEXT,`time` NUMERIC);""")
-#conn.commit
-
-commands = sys.argv
+# Create table
+c.execute('''CREATE TABLE IF NOT EXISTS lifelog
+             (id integer primary key autoincrement,
+              timeOfTask date, msg text)''')
 
 
-if commands[1] == '-m':
-    commandline = ''
-    for i in commands[2:]:
-        commandline += i+' '
-    time = datetime.today()
-    c.execute("INSERT INTO log VALUES (? , ?);" , (commandline, time))
-    conn.commit()
-    print('Done !')
-elif commands[1] == '-l':
-    rows = int(commands[2])
-    c.execute("SELECT * FROM log;")
-    print(c.fetchmany(rows))
-    conn.commit()
+currentDateTime = datetime.datetime.now()
+
+if len(sys.argv) > 1:
+
+    action = sys.argv[1]
+
+    if action == '-m':
+        message = sys.argv[2]
+        sql_query = ''' INSERT INTO lifelog (timeOfTask, msg) VALUES (?,?); '''
+        params = (currentDateTime, message)
+        c.execute(sql_query, params)
+        print('DONE!')
+        conn.commit()
+    elif action == '-l':
+        
+        try:
+            count = int(sys.argv[2])
+        except:
+            print("Enter a number for count of outputs, '", sys.argv[2], "' is not a number", sep="")
+            sys.exit(1)
+
+        sql_query = ''' SELECT * FROM lifelog ORDER BY timeOfTask DESC limit ? '''
+        params = (str(count))
+        print('The last ', count , ' task(s):')
+        for row in c.execute(sql_query, params):
+            print('IN ' + row[1][0:19] , ':\n> ' , row[2], sep="")
+
+    elif action == '-h':
+        print('for add task use -m switch')
+        print('for list task use -l <number> switch')
+        
+else:
+    print("Unknown command! -> press -h for help")
+
 
 conn.close()
-
-
-
-
 
